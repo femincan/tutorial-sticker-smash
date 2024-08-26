@@ -1,6 +1,7 @@
 {
   "name": "tutorial-sticker-smash",
   "version": "1.0.0",
+  "private": true,
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
@@ -11,19 +12,18 @@
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
     "@expo/vector-icons": "^14.0.2",
-    "expo": "~51.0.28",
+    "expo": "~51.0.31",
     "expo-image-picker": "~15.0.7",
     "expo-status-bar": "~1.12.1",
-    "react": "18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "~18.2.0",
+    "react-dom": "~18.2.0",
     "react-native": "0.74.5",
     "react-native-web": "~0.19.12"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@types/react": "^18.2.79",
+    "@types/react": "~18.2.79",
     "typescript": "^5.5.4"
   },
-  "private": true,
-  "packageManager": "pnpm@9.7.1+sha512.faf344af2d6ca65c4c5c8c2224ea77a81a5e8859cbc4e06b1511ddce2f0151512431dd19e6aff31f2c6a8f5f2aced9bd2273e1fed7dd4de1868984059d2c4247"
+  "packageManager": "pnpm@9.8.0+sha512.8e4c3550fb500e808dbc30bb0ce4dd1eb614e30b1c55245f211591ec2cdf9c611cabd34e1364b42f564bd54b3945ed0f49d61d1bbf2ec9bd74b866fcdc723276"
 }
