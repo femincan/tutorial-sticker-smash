@@ -1,2 +1,3 @@
 # tutorial-sticker-smash
-The codes for official React Native tutorial
+
+My codes for official React Native tutorial
