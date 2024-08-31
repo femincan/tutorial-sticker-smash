@@ -1,10 +1,17 @@
-import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
 } from 'react-native-reanimated';
+
+function clamp(val: number, min: number, max: number) {
+  'worklet';
+
+  return Math.min(Math.max(val, min), max);
+}
+
+const maxWidth = 320;
+const maxHeight = 440;
 
 export default function EmojiSticker({
   imageSize,
@@ -13,46 +20,77 @@ export default function EmojiSticker({
   imageSize: number;
   stickerSource: number;
 }) {
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
+  const translationX = useSharedValue(50);
+  const translationY = useSharedValue(50);
+  const prevTranslationX = useSharedValue(0);
+  const prevTranslationY = useSharedValue(0);
+  const isActive = useSharedValue(false);
+  const scale = useSharedValue(1);
+  const startScale = useSharedValue(0);
+
   const containerStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
+      { translateX: translationX.value },
+      { translateY: translationY.value },
     ],
   }));
 
-  const drag = Gesture.Pan().onChange((event) => {
-    translateX.value += event.changeX;
-    translateY.value += event.changeY;
-  });
+  const drag = Gesture.Pan()
+    .minDistance(1)
+    .onStart(() => {
+      prevTranslationX.value = translationX.value;
+      prevTranslationY.value = translationY.value;
+    })
+    .onUpdate((event) => {
+      translationX.value = clamp(
+        prevTranslationX.value + event.translationX,
+        0,
+        maxWidth - imageSize * scale.value
+      );
+      translationY.value = clamp(
+        prevTranslationY.value + event.translationY,
+        0,
+        maxHeight - imageSize * scale.value
+      );
+    });
 
-  const scaleImage = useSharedValue(imageSize);
   const imageStyle = useAnimatedStyle(() => ({
-    width: withSpring(scaleImage.value),
-    height: withSpring(scaleImage.value),
+    width: imageSize,
+    height: imageSize,
+    transform: [{ scale: scale.value }],
   }));
 
-  const doubleTap = Gesture.Tap()
-    .numberOfTaps(2)
+  const borderStyle = useAnimatedStyle(() => {
+    return {
+      borderStyle: isActive.value ? 'solid' : undefined,
+      borderColor: isActive.value ? '#fff' : undefined,
+      borderWidth: isActive.value ? 2 : undefined,
+    };
+  });
+
+  const pinch = Gesture.Pinch()
     .onStart(() => {
-      if (scaleImage.value !== imageSize * 2) {
-        scaleImage.value = scaleImage.value * 2;
-      } else {
-        scaleImage.value = scaleImage.value / 2;
-      }
+      isActive.value = true;
+      startScale.value = scale.value;
+    })
+    .onUpdate((event) => {
+      console.log(event.scale);
+      scale.value = clamp(startScale.value + event.scale, 0.5, 3);
+    })
+    .onEnd(() => {
+      isActive.value = false;
     });
 
   return (
-    <GestureDetector gesture={drag}>
-      <Animated.View style={[containerStyle, { top: -350 }]}>
-        <GestureDetector gesture={doubleTap}>
-          <Animated.Image
-            source={stickerSource}
-            resizeMode='contain'
-            style={imageStyle}
-          />
-        </GestureDetector>
+    <GestureDetector gesture={Gesture.Exclusive(pinch, drag)}>
+      <Animated.View
+        style={[containerStyle, borderStyle, { top: 0, position: 'absolute' }]}
+      >
+        <Animated.Image
+          source={stickerSource}
+          style={imageStyle}
+          resizeMode='contain'
+        />
       </Animated.View>
     </GestureDetector>
   );
